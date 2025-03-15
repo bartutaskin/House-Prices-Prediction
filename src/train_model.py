@@ -199,7 +199,7 @@ def tune_xgb_with_optuna(X, y):
     return study.best_params
 
 
-def preprocess_data(train_df, test_df, one_hot_cols, mapping_dict):
+def preprocess_data(train_df, test_df, mapping_dict):
     # Impute missing values
     train_df = impute_missing_values(train_df)
     test_df = impute_missing_values(test_df)
@@ -212,6 +212,13 @@ def preprocess_data(train_df, test_df, one_hot_cols, mapping_dict):
     train_df = encode_ordinal_cols(train_df, mapping_dict)
     test_df = encode_ordinal_cols(test_df, mapping_dict)
 
+    one_hot_cols = [
+        col
+        for col in train_df.columns
+        if train_df[col].dtype == "O" and col not in list(mapping_dict.keys())
+    ]
+    one_hot_cols.extend(["MSSubClass", "New_AgeCategory"])
+
     # One-hot Encoding
     combined_df = pd.concat([train_df, test_df], axis=0, ignore_index=True)
     combined_df = one_hot_encoder(combined_df, one_hot_cols)
@@ -221,22 +228,59 @@ def preprocess_data(train_df, test_df, one_hot_cols, mapping_dict):
     test_df = combined_df.iloc[len(train_df) :]
 
     return train_df, test_df
+    preprocessed_data = pd.DataFrame([features])
+
+    preprocessed_data = impute_missing_values(preprocessed_data)
+
+    preprocessed_data = create_features(preprocessed_data)
+
+    preprocessed_data = encode_ordinal_cols(preprocessed_data, mapping_dict)
+    print(preprocessed_data)
+    one_hot_cols = [
+        "MSZoning",
+        "Street",
+        "Alley",
+        "LotShape",
+        "LandContour",
+        "Utilities",
+        "LotConfig",
+        "LandSlope",
+        "Neighborhood",
+        "Condition1",
+        "Condition2",
+        "BldgType",
+        "HouseStyle",
+        "RoofStyle",
+        "RoofMatl",
+        "Exterior1st",
+        "Exterior2nd",
+        "MasVnrType",
+        "Foundation",
+        "Heating",
+        "CentralAir",
+        "Electrical",
+        "Functional",
+        "GarageType",
+        "MiscFeature",
+        "SaleType",
+        "SaleCondition",
+        "MSSubClass",
+        "New_AgeCategory",
+    ]
+
+    preprocessed_data = one_hot_encoder(preprocessed_data, one_hot_cols)
+
+    predicted_price = model.predict(preprocessed_data)
+
+    return predicted_price
 
 
 if __name__ == "__main__":
     # Load Data
     train_df, test_df, test_ids = load_dataset("c:/House-Prices-Prediction/data")
 
-    # Define columns to be one-hot encoded
-    one_hot_cols = [
-        col
-        for col in train_df.columns
-        if train_df[col].dtype == "O" and col not in list(mapping_dict.keys())
-    ]
-    one_hot_cols.extend(["MSSubClass", "New_AgeCategory"])
-
     # Preprocess Data
-    train_df, test_df = preprocess_data(train_df, test_df, one_hot_cols, mapping_dict)
+    train_df, test_df = preprocess_data(train_df, test_df, mapping_dict)
 
     # Split Data
     X = train_df.drop("SalePrice", axis=1)
@@ -267,5 +311,5 @@ if __name__ == "__main__":
 
     # Save Predictions
     pd.DataFrame({"Id": test_ids, "SalePrice": y_pred}).to_csv(
-        "data/predictions.csv", index=False
+        "data/predictions2.csv", index=False
     )
