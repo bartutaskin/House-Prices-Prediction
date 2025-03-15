@@ -228,51 +228,6 @@ def preprocess_data(train_df, test_df, mapping_dict):
     test_df = combined_df.iloc[len(train_df) :]
 
     return train_df, test_df
-    preprocessed_data = pd.DataFrame([features])
-
-    preprocessed_data = impute_missing_values(preprocessed_data)
-
-    preprocessed_data = create_features(preprocessed_data)
-
-    preprocessed_data = encode_ordinal_cols(preprocessed_data, mapping_dict)
-    print(preprocessed_data)
-    one_hot_cols = [
-        "MSZoning",
-        "Street",
-        "Alley",
-        "LotShape",
-        "LandContour",
-        "Utilities",
-        "LotConfig",
-        "LandSlope",
-        "Neighborhood",
-        "Condition1",
-        "Condition2",
-        "BldgType",
-        "HouseStyle",
-        "RoofStyle",
-        "RoofMatl",
-        "Exterior1st",
-        "Exterior2nd",
-        "MasVnrType",
-        "Foundation",
-        "Heating",
-        "CentralAir",
-        "Electrical",
-        "Functional",
-        "GarageType",
-        "MiscFeature",
-        "SaleType",
-        "SaleCondition",
-        "MSSubClass",
-        "New_AgeCategory",
-    ]
-
-    preprocessed_data = one_hot_encoder(preprocessed_data, one_hot_cols)
-
-    predicted_price = model.predict(preprocessed_data)
-
-    return predicted_price
 
 
 if __name__ == "__main__":
